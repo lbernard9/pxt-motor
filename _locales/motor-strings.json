@@ -1,0 +1,18 @@
+{
+  "motor.Dir.CCW|block": "CCW",
+  "motor.Dir.CW|block": "CW",
+  "motor.MotorRun|block": "Motor|%index|dir|%Dir|speed|%speed",
+  "motor.Stepper.Ste1|block": "42",
+  "motor.Stepper.Ste2|block": "28",
+  "motor.motorStopAll|block": "Motor Stop All",
+  "motor.motorStop|block": "Motor stop|%index",
+  "motor.servo|block": "Servo|%index|degree|%degree",
+  "motor.stepperDegreeDual_42|block": "Dual Stepper %stepper|M1_M2 dir %direction1|degree %degree1|M3_M4 dir %direction2|degree %degree2",
+  "motor.stepperDegree_28|block": "Stepper 28|%index|dir|%direction|degree|%degree",
+  "motor.stepperDegree_42|block": "Stepper 42|%index|dir|%direction|degree|%degree",
+  "motor.stepperTurnDual_42|block": "Dual Stepper %stepper|M1_M2 dir %direction1|trun %trun1|M3_M4 dir %direction2|trun %trun2",
+  "motor.stepperTurn_28|block": "Stepper 28|%index|dir|%direction|turn|%turn",
+  "motor.stepperTurn_42|block": "Stepper 42|%index|dir|%direction|turn|%turn",
+  "motor|block": "DF-Driver",
+  "{id:category}Motor": "Motor"
+}

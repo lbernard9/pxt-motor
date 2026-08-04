@@ -1,0 +1,18 @@
+{
+  "motor": "This is DFRobot:motor user motor and steering control function.",
+  "motor.Dir": "The user defines the motor rotation direction.",
+  "motor.MotorRun": "Execute a motor\nM1~M4.\nspeed(0~255).",
+  "motor.Motors": "The user selects the 4-way dc motor.",
+  "motor.Servos": "The user can select the 8 steering gear controller.",
+  "motor.Stepper": "The user can choose the step motor model.",
+  "motor.Steppers": "The user can select a two-path stepper motor controller.",
+  "motor.motorStop": "Stop the dc motor.",
+  "motor.motorStopAll": "Stop all motors",
+  "motor.servo": "Steering gear control function.\nS1~S8.\n0°~180°.",
+  "motor.stepperDegreeDual_42": "Two parallel stepper motors are executed simultaneously(DegreeDual).",
+  "motor.stepperDegree_28": "Execute a 28BYJ-48 step motor(Degree).\nM1_M2/M3_M4.",
+  "motor.stepperDegree_42": "Execute a 42BYGH1861A-C step motor(Degree).\nM1_M2/M3_M4.",
+  "motor.stepperTurnDual_42": "Two parallel stepper motors are executed simultaneously(Turn).",
+  "motor.stepperTurn_28": "Execute a 28BYJ-48 step motor(Turn).\nM1_M2/M3_M4.",
+  "motor.stepperTurn_42": "Execute a 42BYGH1861A-C step motor(Turn).\nM1_M2/M3_M4."
+}

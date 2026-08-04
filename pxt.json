@@ -1,10 +1,11 @@
 {
     "name": "motor",
-    "version": "0.0.1",
-    "description": "This is dc motor, stepper motor, steering gear library.",
+    "version": "1.0.0",
+    "description": "Driver Extension Board",
     "license": "GNU",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "microphone": "*"
     },
     "files": [
         "README.md",
