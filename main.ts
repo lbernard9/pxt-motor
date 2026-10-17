@@ -59,6 +59,12 @@ namespace motor {
     const BYG_CHD_L = 2047
     const BYG_CHD_H = 4095
 
+    const STEPS_PER_REV = 200   // pas par tour : à ajuster jusqu'à ce que 360° = 1 tour exact
+
+    // Valeurs [début, fin] des 4 signaux A, B, C, D : identiques à setStepper_42
+    const SIG_ON = [BYG_CHA_L, BYG_CHB_L, BYG_CHC_L, BYG_CHD_L]
+    const SIG_OFF = [BYG_CHA_H, BYG_CHB_H, BYG_CHC_H, BYG_CHD_H]
+
     /**
      * The user can choose the step motor model.
      */
@@ -529,6 +535,92 @@ namespace motor {
     export function motorStopAll(): void {
         for (let idx = 1; idx <= 4; idx++) {
             motorStop(idx);
+        }
+    }
+
+    // Démarre les moteurs choisis en UNE SEULE transmission I2C
+    function startSteppers(run1: boolean, run2: boolean, fwd1: boolean, fwd2: boolean): void {
+        let buf = pins.createBuffer(33)
+        buf[0] = LED0_ON_L
+        for (let m = 0; m < 2; m++) {
+            let run = (m == 0) ? run1 : run2
+            let fwd = (m == 0) ? fwd1 : fwd2
+            let top = (m == 0) ? 7 : 3      // canal le plus haut du moteur
+            if (run) {
+                for (let j = 0; j < 4; j++) {
+                    // sens avant : A,B,C,D ; sens arrière : C,D,A,B
+                    let sig = fwd ? j : (j + 2) % 4
+                    let i = 1 + (top - j) * 4
+                    buf[i] = SIG_ON[sig] & 0xff
+                    buf[i + 1] = (SIG_ON[sig] >> 8) & 0xff
+                    buf[i + 2] = SIG_OFF[sig] & 0xff
+                    buf[i + 3] = (SIG_OFF[sig] >> 8) & 0xff
+                }
+            }
+        }
+        pins.i2cWriteBuffer(PCA9685_ADDRESS, buf)
+    }
+
+    // Arrête les moteurs choisis en UNE SEULE transmission : frein (sorties à 1) ou libre (sorties à 0)
+    function stopSteppers(stop1: boolean, stop2: boolean, brake: boolean): void {
+        let lo = stop2 ? 0 : 4
+        let hi = stop1 ? 7 : 3
+        let nb = hi - lo + 1
+        let buf = pins.createBuffer(1 + nb * 4)
+        buf[0] = LED0_ON_L + 4 * lo
+        if (brake) {
+            for (let c = 0; c < nb; c++) {
+                buf[1 + c * 4 + 2] = 0xff
+                buf[1 + c * 4 + 3] = 0x0f   // OFF = 4095 : sortie à 1 en permanence
+            }
+        }
+        pins.i2cWriteBuffer(PCA9685_ADDRESS, buf)
+    }
+
+    /**
+     * Fait tourner les 2 moteurs pas à pas (42) en même temps, à la fréquence choisie.
+     * freq : 24 à 300 Hz (50 Hz = vitesse de l'ancien bloc).
+     */
+    //% weight=45
+    //% blockId=motor_stepperDualFreq block="Steppers 42 M1_M2 dir %d1 degree %degree1|M3_M4 dir %d2 degree %degree2 frequency %freq Hz|brake %brake"
+    //% degree1.defl=360 degree2.defl=360
+    //% freq.min=24 freq.max=300 freq.defl=50
+    //% brake.defl=true
+    //% d1.fieldEditor="gridpicker" d1.fieldOptions.columns=2
+    //% d2.fieldEditor="gridpicker" d2.fieldOptions.columns=2
+    //% inlineInputMode=external
+    export function stepperDualFreq(d1: Dir, degree1: number, d2: Dir, degree2: number, freq: number, brake: boolean): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        if (freq < 24) freq = 24
+        if (freq > 300) freq = 300
+        // 4 pas par période de la puce : durée = pas x 250 / fréquence (en ms)
+        let t1 = Math.idiv(Math.idiv(Math.abs(degree1) * STEPS_PER_REV, 360) * 250, freq)
+        let t2 = Math.idiv(Math.idiv(Math.abs(degree2) * STEPS_PER_REV, 360) * 250, freq)
+        let run1 = t1 > 0
+        let run2 = t2 > 0
+        if (!run1 && !run2) return
+
+        setFreq(freq)
+        startSteppers(run1, run2, d1 > 0, d2 > 0)
+
+        if (run1 && run2 && t1 != t2) {
+            // distances différentes : le moteur le plus court s'arrête en premier
+            if (t1 < t2) {
+                basic.pause(t1)
+                stopSteppers(true, false, brake)
+                basic.pause(t2 - t1)
+                stopSteppers(false, true, brake)
+            } else {
+                basic.pause(t2)
+                stopSteppers(false, true, brake)
+                basic.pause(t1 - t2)
+                stopSteppers(true, false, brake)
+            }
+        } else {
+            basic.pause(Math.max(t1, t2))
+            stopSteppers(run1, run2, brake)
         }
     }
 }
